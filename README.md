@@ -52,3 +52,16 @@ python src/bridge_truss/truss_geometry.py
 
 The program saves `results/truss_geometry.png`. The next milestone is a solver
 that calculates support reactions and axial member forces.
+
+## Run the first force analysis
+
+The default case applies a 100 kN downward load to the center deck joint (`B2`).
+It uses a pin support at `B0` and a roller support at `B4`.
+
+```powershell
+$env:PYTHONPATH = "src"
+.\.venv\Scripts\python.exe -m bridge_truss.truss_analysis
+```
+
+The program reports reactions and member axial forces in kilonewtons. Positive
+force means tension; negative force means compression.
