@@ -131,21 +131,30 @@ def solve_truss(
     return AnalysisResult(displacement_by_node, reaction_by_node, member_forces_n)
 
 
-def analyze_default_central_load(load_n: float = 100_000.0) -> AnalysisResult:
-    """Analyze the project truss under a downward central deck load.
+def analyze_single_deck_load(
+    load_node: str, load_n: float = 100_000.0
+) -> AnalysisResult:
+    """Analyze the project truss under one downward load at a deck joint.
 
     The left support is a pin and the right support is a vertical roller.
-    The default 100 kN load is applied at center bottom joint B2.
+    ``load_node`` must be one of the bottom-joint identifiers, such as ``B2``.
     """
     nodes, members = build_warren_truss()
+    if load_node not in nodes or not load_node.startswith("B"):
+        raise ValueError("load_node must name a bottom truss joint, such as 'B2'")
     return solve_truss(
         nodes=nodes,
         members=members,
-        loads_n={"B2": (0.0, -load_n)},
+        loads_n={load_node: (0.0, -load_n)},
         constrained_dofs={"B0": ("x", "y"), "B4": ("y",)},
         youngs_modulus_pa=200e9,
         area_m2=0.005,
     )
+
+
+def analyze_default_central_load(load_n: float = 100_000.0) -> AnalysisResult:
+    """Analyze the project truss under a downward central deck load at B2."""
+    return analyze_single_deck_load(load_node="B2", load_n=load_n)
 
 
 if __name__ == "__main__":

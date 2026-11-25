@@ -80,3 +80,15 @@ $env:PYTHONPATH = "src"
 For the default 100 kN centered load, the output reports the member with the
 largest utilization and predicts the deck load at which that member would first
 reach its modeled capacity.
+
+## Analyze load position
+
+The numerical sweep compares a point load at the three interior deck joints
+(`B1`, `B2`, and `B3`). It saves a reusable CSV table and a graph in `results/`.
+
+```powershell
+.\.venv\Scripts\python.exe -m bridge_truss.load_position_sweep
+```
+
+The graph answers the project question: how does point-load position affect the
+load at which the first truss member is predicted to fail?
