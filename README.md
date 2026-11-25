@@ -92,3 +92,14 @@ The numerical sweep compares a point load at the three interior deck joints
 
 The graph answers the project question: how does point-load position affect the
 load at which the first truss member is predicted to fail?
+
+## Visualize member forces
+
+This diagram uses blue for tension, red for compression, and line width to show
+relative axial-force magnitude. Each member label is its force magnitude in kN.
+
+```powershell
+.\.venv\Scripts\python.exe -m bridge_truss.force_visualization
+```
+
+The diagram is saved as `results/force_diagram.png`.
