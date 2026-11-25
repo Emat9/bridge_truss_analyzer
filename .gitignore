@@ -10,7 +10,8 @@ htmlcov/
 venv/
 
 # Editor and operating-system files
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .DS_Store
 Thumbs.db
 
