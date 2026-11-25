@@ -1,6 +1,7 @@
 # Python bytecode and test tooling
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .coverage
 htmlcov/
