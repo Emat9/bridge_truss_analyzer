@@ -1,105 +1,106 @@
 # Bridge Truss Force Analyzer
 
-A Python project that models a two-dimensional pin-jointed Warren truss bridge,
-calculates its member forces under deck loads, and estimates which member reaches
-its failure limit first.
+This Python project models a two-dimensional Warren truss bridge. It calculates
+member forces, estimates the first member to fail, and studies how the location
+of a point load changes the result.
 
-> **Scope:** This is an educational, linear-elastic model. It is not suitable for
-> real bridge design or safety decisions.
+> **Educational scope:** This is a linear-elastic, pin-jointed model for a
+> computational physics and engineering course. It is not a real bridge-design
+> or safety tool.
 
 ## Project question
 
-How do load magnitude and load position affect the internal forces and predicted
-first-failure member of a simple bridge truss?
+How does the position of a downward point load affect the internal forces and
+the predicted first-failure load of a Warren truss bridge?
 
-## Planned features
+## Model assumptions
 
-- Define a 2D Warren truss with pin and roller supports.
-- Calculate axial member forces with the direct stiffness method.
-- Classify members as in tension or compression.
-- Compare axial forces against tensile yield and Euler buckling capacities.
-- Visualize force magnitude and tension/compression in a truss diagram.
-- Sweep load location and magnitude to identify predicted failure patterns.
+- The bridge is a 16 m, four-panel Warren truss.
+- Joints are ideal pins; members carry only axial tension or compression.
+- The left support is a pin and the right support is a roller.
+- Members are modeled as solid circular structural-steel bars.
+- The model uses 250 MPa steel yield strength and a 0.005 m² member area.
+- Tension members are checked for yielding; compression members are checked for
+  Euler buckling.
 
-## Setup
+## Main results
 
-This project will use Python 3.11+ and the packages listed in
-`requirements.txt`.
+For a 100 kN downward load at the center joint (`B2`), the solver finds equal
+50 kN upward reactions at the two supports. The middle top chord (`top_1`) has
+the largest compression force and is predicted to buckle first.
+
+| Point-load location | Predicted first-failure load | First-failure member | Mode |
+|---|---:|---|---|
+| B1 (4 m) | 245.44 kN | `top_0` | Euler buckling |
+| B2 (8 m, center) | **184.08 kN** | `top_1` | Euler buckling |
+| B3 (12 m) | 245.44 kN | `top_2` | Euler buckling |
+
+The center load is most critical because it produces the largest compression in
+the center top chord. The equal B1/B3 results are expected because the bridge
+geometry is symmetric.
+
+## Generated figures
+
+- `results/truss_geometry.png`: bridge shape, joint labels, and supports.
+- `results/force_diagram.png`: blue tension members, red compression members,
+  and member-force magnitudes.
+- `results/load_position_sweep.png`: first-failure load versus load location.
+- `results/load_position_sweep.csv`: numerical data behind the sweep graph.
+
+These files are generated locally and are intentionally not committed; rerun
+the commands below to recreate them.
+
+## Setup and run
+
+Open a terminal in the repository folder and run the following once:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -e .
 ```
+
+Run an individual part of the project with one of these commands:
+
+```powershell
+.\.venv\Scripts\python.exe -m bridge_truss.truss_geometry
+.\.venv\Scripts\python.exe -m bridge_truss.truss_analysis
+.\.venv\Scripts\python.exe -m bridge_truss.failure_analysis
+.\.venv\Scripts\python.exe -m bridge_truss.load_position_sweep
+.\.venv\Scripts\python.exe -m bridge_truss.force_visualization
+```
+
+Run all automated checks:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+## Plain-language guide to the Python files
+
+| File | What it does |
+|---|---|
+| `src/bridge_truss/__init__.py` | Marks `bridge_truss` as a Python package. |
+| `src/bridge_truss/truss_geometry.py` | Creates the locations of the bridge joints and the list of members connecting them. It also draws the basic bridge shape. |
+| `src/bridge_truss/truss_analysis.py` | Uses the direct stiffness method to calculate support reactions, joint movements, and axial force in every member. Positive force is tension; negative force is compression. |
+| `src/bridge_truss/failure_analysis.py` | Compares member forces with yield and buckling capacities to estimate which member fails first. |
+| `src/bridge_truss/load_position_sweep.py` | Repeats the analysis for loads at B1, B2, and B3, then saves the numerical table and graph. |
+| `src/bridge_truss/force_visualization.py` | Turns the calculated forces into a presentation-ready diagram with color and line width. |
+| `tests/test_truss_geometry.py` | Checks the number and layout of nodes and members. |
+| `tests/test_truss_analysis.py` | Checks force equilibrium, equal reactions for a centered load, and downward deflection. |
+| `tests/test_failure_analysis.py` | Checks the material/section calculations and first-failure prediction. |
+| `tests/test_load_position_sweep.py` | Checks that the sweep includes all three load locations and preserves symmetry. |
+| `tests/test_force_visualization.py` | Checks that known members receive the correct tension/compression display colors. |
 
 ## Repository layout
 
 ```text
-src/bridge_truss/  # Model, analysis, and plotting code
-tests/             # Automated checks and numerical sanity tests
-data/              # Small input data files, if needed
-results/           # Locally generated charts and tables (not committed)
+src/bridge_truss/  Python model, calculations, and plotting code
+tests/             Automated numerical checks
+data/              Small input data files, if needed
+results/           Locally generated figures and CSV tables
+VIDEO_OUTLINE.md   Short presentation plan
 ```
 
-## Status
-
-The first milestone, truss geometry, is implemented. To generate its drawing:
-
-```powershell
-$env:PYTHONPATH = "src"
-python src/bridge_truss/truss_geometry.py
-```
-
-The program saves `results/truss_geometry.png`. The next milestone is a solver
-that calculates support reactions and axial member forces.
-
-## Run the first force analysis
-
-The default case applies a 100 kN downward load to the center deck joint (`B2`).
-It uses a pin support at `B0` and a roller support at `B4`.
-
-```powershell
-$env:PYTHONPATH = "src"
-.\.venv\Scripts\python.exe -m bridge_truss.truss_analysis
-```
-
-The program reports reactions and member axial forces in kilonewtons. Positive
-force means tension; negative force means compression.
-
-## Estimate first failure
-
-The failure model assumes solid circular structural-steel members. Tension
-members are compared with yielding; compression members are compared with Euler
-buckling. This is an educational approximation, not a real bridge design.
-
-```powershell
-$env:PYTHONPATH = "src"
-.\.venv\Scripts\python.exe -m bridge_truss.failure_analysis
-```
-
-For the default 100 kN centered load, the output reports the member with the
-largest utilization and predicts the deck load at which that member would first
-reach its modeled capacity.
-
-## Analyze load position
-
-The numerical sweep compares a point load at the three interior deck joints
-(`B1`, `B2`, and `B3`). It saves a reusable CSV table and a graph in `results/`.
-
-```powershell
-.\.venv\Scripts\python.exe -m bridge_truss.load_position_sweep
-```
-
-The graph answers the project question: how does point-load position affect the
-load at which the first truss member is predicted to fail?
-
-## Visualize member forces
-
-This diagram uses blue for tension, red for compression, and line width to show
-relative axial-force magnitude. Each member label is its force magnitude in kN.
-
-```powershell
-.\.venv\Scripts\python.exe -m bridge_truss.force_visualization
-```
-
-The diagram is saved as `results/force_diagram.png`.
+See [VIDEO_OUTLINE.md](VIDEO_OUTLINE.md) for a concise script for the final
+video.
