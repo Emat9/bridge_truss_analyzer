@@ -65,3 +65,18 @@ $env:PYTHONPATH = "src"
 
 The program reports reactions and member axial forces in kilonewtons. Positive
 force means tension; negative force means compression.
+
+## Estimate first failure
+
+The failure model assumes solid circular structural-steel members. Tension
+members are compared with yielding; compression members are compared with Euler
+buckling. This is an educational approximation, not a real bridge design.
+
+```powershell
+$env:PYTHONPATH = "src"
+.\.venv\Scripts\python.exe -m bridge_truss.failure_analysis
+```
+
+For the default 100 kN centered load, the output reports the member with the
+largest utilization and predicts the deck load at which that member would first
+reach its modeled capacity.
