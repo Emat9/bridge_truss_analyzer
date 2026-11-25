@@ -43,4 +43,12 @@ results/           # Locally generated charts and tables (not committed)
 
 ## Status
 
-Project scaffold created; truss geometry and solver are next.
+The first milestone, truss geometry, is implemented. To generate its drawing:
+
+```powershell
+$env:PYTHONPATH = "src"
+python src/bridge_truss/truss_geometry.py
+```
+
+The program saves `results/truss_geometry.png`. The next milestone is a solver
+that calculates support reactions and axial member forces.
